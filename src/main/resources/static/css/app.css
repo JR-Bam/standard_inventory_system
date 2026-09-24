@@ -1,0 +1,1168 @@
+/* =========================================================
+   Inventory System — Theme Stylesheet
+   MDB 5 + Material Symbols
+
+   Table of contents
+   ─────────────────────────────────────────────────────────
+   01. Design tokens (CSS custom properties)
+   02. Base and typography
+   03. Top bar
+   04. Sidebar
+   05. Main content area
+   06. Mobile responsiveness
+   07. Buttons and links
+   08. Cards (legacy Bootstrap/MDB overrides)
+   09. Tables
+   10. Badges and alerts
+   11. Forms
+   12. Page header (shared across pages)
+   13. Surface cards (Material pattern)
+   14. Stat cards (dashboard + detail summary)
+   15. Detail list (definition list pattern)
+   16. Stock status ring
+   17. Empty states
+   18. Utilities
+   ========================================================= */
+
+
+/* =========================================================
+   01. Design tokens
+   ========================================================= */
+:root {
+    /* --- Brand palette ---------------------------------------- */
+    --theme-primary:   #FFFFFF;
+    --theme-secondary: #315B8C;
+    --theme-tertiary:  #F2765E;
+    --theme-subtle:    #413333;
+
+    /* --- Text colors ------------------------------------------ */
+    --text-on-primary:   #2c2c2c;
+    --text-on-secondary: #F5EFE3;
+    --text-on-tertiary:  #FFFFFF;
+
+    /* --- Semantic text colors --------------------------------- */
+    --text-muted:        rgba(65, 51, 51, 0.6);
+    --text-muted-soft:   rgba(65, 51, 51, 0.55);
+    --text-danger:       #a94442;
+    --text-success:      #2E7D5B;
+
+    /* --- Semantic backgrounds --------------------------------- */
+    --bg-hover-blue:     rgba(49, 91, 140, 0.04);
+    --bg-hover-blue-md:  rgba(49, 91, 140, 0.08);
+    --bg-hover-blue-lg:  rgba(49, 91, 140, 0.16);
+    --bg-soft-coral:     rgba(242, 118, 94, 0.10);
+    --bg-soft-dark:      rgba(65, 51, 51, 0.05);
+
+    /* --- Semantic borders ------------------------------------- */
+    --border-soft:       rgba(65, 51, 51, 0.08);
+    --border-medium:     rgba(65, 51, 51, 0.12);
+    --border-strong:     rgba(65, 51, 51, 0.15);
+
+    /* --- Card shadows ----------------------------------------- */
+    --shadow-card:       0 2px 6px rgba(65, 51, 51, 0.04);
+    --shadow-card-hover: 0 4px 12px rgba(65, 51, 51, 0.08);
+
+    /* --- Radii ------------------------------------------------ */
+    --radius-sm: 8px;
+    --radius-md: 12px;
+    --radius-lg: 14px;
+
+    /* --- Layout dimensions ------------------------------------ */
+    --top-bar-height:      56px;
+    --sidebar-width:       240px;
+    --sidebar-collapsed-w: 64px;
+
+    /* --- Sidebar state ---------------------------------------- */
+    --sidebar-bg:          var(--theme-primary);
+    --sidebar-text:        #2c2c2c;
+    --sidebar-hover-bg:    var(--bg-hover-blue-md);
+    --sidebar-active-bg:   var(--theme-tertiary);
+    --sidebar-active-text: #FFFFFF;
+    --sidebar-border:      var(--border-strong);
+
+    /* --- MDB / Bootstrap variable overrides ------------------- */
+    --mdb-primary:          var(--theme-secondary);
+    --mdb-secondary:        var(--theme-subtle);
+    --mdb-tertiary:         var(--theme-tertiary);
+    --mdb-body-bg:          var(--theme-primary);
+    --mdb-body-color:       var(--text-on-primary);
+    --mdb-link-color:       var(--theme-tertiary);
+    --mdb-link-hover-color: #d45a42;
+}
+
+
+/* =========================================================
+   02. Base and typography
+   ========================================================= */
+body {
+    font-family: 'Roboto', system-ui, -apple-system, 'Segoe UI', sans-serif;
+    background-color: var(--theme-primary);
+    color: var(--text-on-primary);
+    min-height: 100vh;
+}
+
+.material-symbols-outlined {
+    font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+    vertical-align: middle;
+}
+
+/* Filled variant for status/ring icons */
+.material-symbols-outlined.is-filled {
+    font-variation-settings: 'FILL' 1, 'wght' 400, 'GRAD' 0, 'opsz' 48;
+}
+
+
+/* =========================================================
+   03. Top bar
+   ========================================================= */
+/* Default state: solid blue, using a gradient with full alpha */
+.top-bar {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: var(--top-bar-height);
+    z-index: 1040;
+    display: flex;
+    align-items: center;
+    padding: 0 16px;
+    color: var(--text-on-secondary);
+
+    background-image: linear-gradient(
+            to right,
+            rgba(49, 91, 140, 1) 0%,
+            rgba(49, 91, 140, 1) 22%,
+            rgba(49, 91, 140, 1) 55%,
+            rgba(49, 91, 140, 1) 100%
+    );
+    background-color: transparent;
+
+    box-shadow:
+            0 1px 2px rgba(0, 0, 0, 0.06),
+            0 2px 4px rgba(0, 0, 0, 0.05),
+            0 4px 8px rgba(0, 0, 0, 0.04);
+
+    transition:
+            background-image 0.25s ease,
+            backdrop-filter 0.25s ease,
+            box-shadow 0.25s ease;
+}
+
+/* Scrolled state: same gradient shape, lower alpha on the right */
+.top-bar.is-scrolled {
+    background-color: transparent;
+
+    background-image: linear-gradient(
+            to right,
+            rgba(49, 91, 140, 0.95) 0%,
+            rgba(49, 91, 140, 0.88) 22%,
+            rgba(49, 91, 140, 0.72) 55%,
+            rgba(49, 91, 140, 0.60) 100%
+    );
+
+    backdrop-filter: saturate(180%) blur(12px);
+    -webkit-backdrop-filter: saturate(180%) blur(12px);
+
+    box-shadow:
+            0 2px 4px rgba(0, 0, 0, 0.08),
+            0 4px 8px rgba(0, 0, 0, 0.06),
+            0 8px 16px rgba(0, 0, 0, 0.05);
+}
+
+.top-bar .brand {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 1.1rem;
+    font-weight: 500;
+    color: var(--text-on-secondary);
+    text-decoration: none;
+}
+
+.top-bar .brand-text {
+    display: flex;
+    flex-direction: column;
+    line-height: 1.1;
+}
+
+.top-bar .brand-company {
+    font-weight: 600;
+    font-size: 0.95rem;
+    letter-spacing: 0.01em;
+}
+
+.top-bar .brand-product {
+    font-weight: 300;
+    font-size: 0.72rem;
+    opacity: 0.85;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+}
+
+.hamburger-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 40px;
+    height: 40px;
+    margin-right: 8px;
+    background: transparent;
+    border: none;
+    border-radius: 50%;
+    color: var(--text-on-secondary);
+    cursor: pointer;
+    transition: background-color 0.2s;
+}
+
+.hamburger-btn:hover {
+    background-color: rgba(255, 255, 255, 0.1);
+}
+
+
+
+/* =========================================================
+   04. Sidebar
+   ========================================================= */
+.sidebar {
+    position: fixed;
+    top: var(--top-bar-height);
+    left: 0;
+    bottom: 0;
+    width: var(--sidebar-width);
+    overflow-y: auto;
+    overflow-x: hidden;
+    transition: width 0.25s ease, transform 0.25s ease;
+    z-index: 1030;
+
+    background-color: var(--theme-primary);
+    background-image:
+            linear-gradient(rgba(255, 255, 255, 0.8), rgba(255, 255, 255, 0.8)),
+            url('/images/sidebar-bg.jpg');
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
+    background-attachment: local;
+
+    box-shadow:
+            1px 0 2px rgba(65, 51, 51, 0.04),
+            2px 0 4px rgba(65, 51, 51, 0.04),
+            4px 0 8px rgba(65, 51, 51, 0.03);
+}
+
+.sidebar.collapsed {
+    width: var(--sidebar-collapsed-w);
+}
+
+.sidebar.collapsed .nav-text {
+    display: none;
+}
+
+.sidebar.collapsed .nav-icon {
+    margin-right: 0;
+}
+
+.sidebar.collapsed .nav-item a {
+    justify-content: center;
+    padding-left: 0;
+    padding-right: 0;
+}
+
+.sidebar-nav {
+    list-style: none;
+    padding: 8px 0;
+    margin: 0;
+}
+
+.sidebar-nav .nav-item {
+    margin: 2px 8px;
+}
+
+.sidebar-nav .nav-item a {
+    position: relative;      /* required for the ripple's absolute positioning */
+    overflow: hidden;        /* clip the ripple to the link's rounded shape */
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 10px 12px;
+    font-size: 0.92rem;
+    color: var(--sidebar-text);
+    text-decoration: none;
+    border-radius: var(--radius-sm);
+    white-space: nowrap;
+    transition: background-color 0.15s, color 0.15s;
+}
+
+.sidebar-nav .nav-item a:hover {
+    background-color: var(--sidebar-hover-bg);
+}
+
+.sidebar-nav .nav-item a.active {
+    background-color: var(--sidebar-active-bg);
+    color: var(--sidebar-active-text);
+    font-weight: 500;
+}
+
+.sidebar-nav .nav-icon {
+    font-size: 22px;
+    flex-shrink: 0;
+}
+
+.sidebar-backdrop {
+    display: none;
+    position: fixed;
+    top: var(--top-bar-height);
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.4);
+    z-index: 1025;
+}
+
+.sidebar-backdrop.show {
+    display: block;
+}
+
+
+/* =========================================================
+   05. Main content area
+   ========================================================= */
+.main-content {
+    margin-top: var(--top-bar-height);
+    margin-left: var(--sidebar-width);
+    padding: 24px;
+    min-height: calc(100vh - var(--top-bar-height));
+    transition: margin-left 0.25s ease;
+}
+
+.main-content.sidebar-collapsed {
+    margin-left: var(--sidebar-collapsed-w);
+}
+
+
+/* =========================================================
+   06. Mobile responsiveness
+   ========================================================= */
+@media (max-width: 768px) {
+    .sidebar {
+        transform: translateX(-100%);
+        width: var(--sidebar-width);
+        border-right: 1px solid var(--sidebar-border);
+        box-shadow: 2px 0 8px rgba(0, 0, 0, 0.1);
+    }
+
+    .sidebar.mobile-open {
+        transform: translateX(0);
+    }
+
+    .sidebar.collapsed {
+        width: var(--sidebar-width);
+    }
+
+    .sidebar.collapsed .nav-text {
+        display: inline;
+    }
+
+    .main-content,
+    .main-content.sidebar-collapsed {
+        margin-left: 0;
+    }
+}
+
+@media (max-width: 576px) {
+    .top-bar .brand-product {
+        display: none;
+    }
+
+    .page-header {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+
+    .detail-row {
+        flex-direction: column;
+        gap: 4px;
+    }
+
+    .detail-row dt {
+        flex: none;
+    }
+}
+
+
+/* =========================================================
+   07. Buttons and links
+   ========================================================= */
+.btn-primary {
+    --mdb-btn-bg: var(--theme-secondary);
+    --mdb-btn-border-color: var(--theme-secondary);
+    --mdb-btn-hover-bg: #26476e;
+    --mdb-btn-hover-border-color: #26476e;
+    --mdb-btn-active-bg: #1d3757;
+    --mdb-btn-active-border-color: #1d3757;
+}
+
+.btn-outline-primary {
+    --mdb-btn-color: var(--theme-secondary);
+    --mdb-btn-border-color: var(--theme-secondary);
+    --mdb-btn-hover-bg: var(--theme-secondary);
+    --mdb-btn-hover-border-color: var(--theme-secondary);
+}
+
+/* Round icon-only navigation button (back arrow, etc.) */
+.icon-back {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    color: var(--theme-secondary);
+    background-color: var(--bg-hover-blue-md);
+    text-decoration: none;
+    flex-shrink: 0;
+    transition: background-color 0.15s;
+}
+
+.icon-back:hover {
+    background-color: var(--bg-hover-blue-lg);
+}
+
+a {
+    color: var(--theme-tertiary);
+}
+
+a:hover {
+    color: #d45a42;
+}
+
+.text-primary {
+    color: var(--theme-secondary) !important;
+}
+
+.nav-link.active {
+    font-weight: 600;
+    color: var(--theme-tertiary) !important;
+}
+
+
+/* =========================================================
+   08. Cards (Bootstrap / MDB overrides)
+   ========================================================= */
+.card {
+    background-color: #fff;
+    border: 1px solid var(--border-strong);
+}
+
+.card-header {
+    background-color: var(--theme-primary);
+}
+
+
+/* =========================================================
+   09. Tables
+   ========================================================= */
+.table {
+    border-collapse: collapse;
+    border: none !important;
+    margin-bottom: 0;
+}
+
+.table > :not(caption) > * > * {
+    border-width: 0;
+    border-bottom: 1px solid var(--border-medium);
+    box-shadow: none !important;
+    padding: 0.85rem 0.75rem;
+}
+
+.table > thead > tr > th {
+    background-color: var(--theme-secondary);
+    color: var(--text-on-secondary);
+    font-weight: 500;
+    font-size: 0.85rem;
+    letter-spacing: 0.02em;
+    text-transform: uppercase;
+    border-bottom: 1px solid var(--theme-secondary) !important;
+}
+
+.table > thead > tr > th:first-child {
+    border-top-left-radius: var(--radius-sm);
+}
+
+.table > thead > tr > th:last-child {
+    border-top-right-radius: var(--radius-sm);
+}
+
+.table > tbody > tr:last-child > td {
+    border-bottom: none;
+}
+
+.table > tbody > tr:hover > * {
+    background-color: var(--bg-hover-blue);
+}
+
+/* If a table is the first child of a .card, round header corners cleanly */
+.card > .table-responsive:first-child > .table > thead > tr > th:first-child {
+    border-top-left-radius: var(--radius-sm);
+}
+
+.card > .table-responsive:first-child > .table > thead > tr > th:last-child {
+    border-top-right-radius: var(--radius-sm);
+}
+
+
+/* =========================================================
+   10. Badges and alerts
+   ========================================================= */
+.badge.bg-success {
+    background-color: var(--theme-secondary) !important;
+}
+
+.badge.bg-danger {
+    background-color: var(--text-danger) !important;
+}
+
+.badge.bg-warning {
+    background-color: var(--theme-tertiary) !important;
+    color: #fff !important;
+}
+
+.badge.bg-dark {
+    background-color: var(--theme-subtle) !important;
+}
+
+/* Small icon inside a badge (movement type tags) */
+.badge-icon {
+    font-size: 14px;
+    vertical-align: middle;
+    margin-right: 2px;
+}
+
+.alert-success {
+    background-color: rgba(49, 91, 140, 0.1);
+    border-color: rgba(49, 91, 140, 0.3);
+    color: var(--theme-secondary);
+}
+
+.alert-danger {
+    background-color: rgba(242, 118, 94, 0.12);
+    border-color: rgba(242, 118, 94, 0.4);
+    color: var(--text-danger);
+}
+
+
+/* =========================================================
+   11. Forms
+   ========================================================= */
+.form-outline {
+    margin-bottom: 0;
+}
+
+.form-outline .invalid-feedback,
+.invalid-feedback.d-block {
+    margin-top: 0.25rem;
+    font-size: 0.8rem;
+}
+
+.form-text {
+    font-size: 0.78rem;
+    color: #6c757d;
+}
+
+/* Required-field asterisk */
+.required::after {
+    content: " *";
+    color: var(--text-danger);
+    font-weight: 600;
+}
+
+/* Form action bar (bottom of every form) */
+.form-actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 0.5rem;
+    margin-top: 1.5rem;
+    padding-top: 1rem;
+    border-top: 1px solid var(--border-soft);
+}
+
+
+/* =========================================================
+   12. Page header (shared across pages)
+   ========================================================= */
+.page-header {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 1.5rem;
+}
+
+.page-header h2 {
+    margin-bottom: 0;
+}
+
+/* Enhanced header with back button + subtitle (item detail style) */
+.detail-header {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 16px;
+    flex-wrap: wrap;
+    margin-bottom: 1.5rem;
+}
+
+.detail-header-left {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    min-width: 0;
+}
+
+.detail-header-actions {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+}
+
+.detail-title {
+    font-size: 1.65rem;
+    font-weight: 600;
+    margin: 0;
+    line-height: 1.2;
+    color: var(--theme-subtle);
+}
+
+.detail-subtitle {
+    font-size: 0.9rem;
+    color: var(--text-muted);
+    margin-top: 2px;
+}
+
+.detail-dot {
+    margin: 0 6px;
+    opacity: 0.6;
+}
+
+@media (max-width: 576px) {
+    .detail-header {
+        flex-direction: column;
+        align-items: stretch;
+    }
+
+    .detail-header-actions {
+        justify-content: flex-end;
+    }
+}
+
+
+/* =========================================================
+   13. Surface cards (Material pattern)
+   ========================================================= */
+.surface-card {
+    background-color: #fff;
+    border: 1px solid var(--border-soft);
+    border-radius: var(--radius-lg);
+    box-shadow: var(--shadow-card);
+    overflow: hidden;
+}
+
+.surface-header {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 14px 20px;
+    border-bottom: 1px solid var(--border-soft);
+    background-color: rgba(49, 91, 140, 0.03);
+}
+
+.surface-header .material-symbols-outlined {
+    font-size: 20px;
+    color: var(--theme-secondary);
+}
+
+.surface-header h6 {
+    margin: 0;
+    font-size: 0.82rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    color: var(--theme-subtle);
+}
+
+.surface-body {
+    padding: 20px;
+}
+
+/* Trailing link in a surface header (e.g., "View all →") */
+.surface-header .ms-auto {
+    font-weight: 500;
+    display: inline-flex;
+    align-items: center;
+    gap: 2px;
+}
+
+/* --- Surface header color variants --- */
+.surface-header-coral {
+    background-color: var(--bg-soft-coral);
+    border-bottom-color: rgba(242, 118, 94, 0.2);
+}
+
+.surface-header-coral .material-symbols-outlined {
+    color: var(--theme-tertiary);
+}
+
+.surface-header-dark {
+    background-color: var(--bg-soft-dark);
+    border-bottom-color: var(--border-strong);
+}
+
+.surface-header-dark .material-symbols-outlined {
+    color: var(--theme-subtle);
+}
+
+
+/* =========================================================
+   14. Stat cards
+   ========================================================= */
+.stat-card {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    padding: 18px 20px;
+    background-color: #fff;
+    border: 1px solid var(--border-soft);
+    border-radius: var(--radius-lg);
+    box-shadow: var(--shadow-card);
+    transition: box-shadow 0.15s;
+}
+
+.stat-card:hover {
+    box-shadow: var(--shadow-card-hover);
+}
+
+.stat-icon {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 48px;
+    height: 48px;
+    border-radius: var(--radius-md);
+    flex-shrink: 0;
+}
+
+.stat-icon .material-symbols-outlined {
+    font-size: 24px;
+}
+
+.stat-icon-blue {
+    background-color: rgba(49, 91, 140, 0.12);
+    color: var(--theme-secondary);
+}
+
+.stat-icon-coral {
+    background-color: rgba(242, 118, 94, 0.14);
+    color: var(--theme-tertiary);
+}
+
+.stat-icon-green {
+    background-color: rgba(79, 91, 42, 0.14);
+    color: #4F5B2A;
+}
+
+.stat-icon-dark {
+    background-color: rgba(65, 51, 51, 0.1);
+    color: var(--theme-subtle);
+}
+
+.stat-label {
+    font-size: 0.78rem;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: var(--text-muted-soft);
+    font-weight: 500;
+}
+
+.stat-value {
+    font-size: 1.5rem;
+    font-weight: 600;
+    color: var(--theme-subtle);
+    line-height: 1.15;
+    margin-top: 2px;
+}
+
+
+/* =========================================================
+   15. Detail list (definition list pattern)
+   ========================================================= */
+.detail-list {
+    margin: 0;
+}
+
+.detail-row {
+    display: flex;
+    align-items: baseline;
+    gap: 16px;
+    padding: 12px 0;
+    border-bottom: 1px solid rgba(65, 51, 51, 0.06);
+}
+
+.detail-row:first-child {
+    padding-top: 0;
+}
+
+.detail-row:last-child {
+    border-bottom: none;
+    padding-bottom: 0;
+}
+
+.detail-row dt {
+    flex: 0 0 140px;
+    font-weight: 500;
+    font-size: 0.85rem;
+    color: var(--text-muted);
+    margin: 0;
+}
+
+.detail-row dd {
+    flex: 1;
+    margin: 0;
+    font-size: 0.95rem;
+    color: var(--text-on-primary);
+    word-break: break-word;
+}
+
+/* Block variant — label above value (long text) */
+.detail-row-block {
+    flex-direction: column;
+    gap: 6px;
+}
+
+.detail-row-block dt {
+    flex: none;
+}
+
+
+/* =========================================================
+   16. Stock status ring
+   ========================================================= */
+.stock-ring {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 88px;
+    height: 88px;
+    border-radius: 50%;
+    margin-bottom: 16px;
+    border: 4px solid currentColor;
+}
+
+.stock-ring .stock-ring-icon {
+    font-size: 42px;
+    font-variation-settings: 'FILL' 1, 'wght' 400, 'GRAD' 0, 'opsz' 48;
+}
+
+.stock-ring-success {
+    color: var(--theme-secondary);
+    background-color: rgba(49, 91, 140, 0.06);
+}
+
+.stock-ring-danger {
+    color: var(--text-danger);
+    background-color: rgba(169, 68, 66, 0.06);
+}
+
+.stock-ring-dark {
+    color: var(--theme-subtle);
+    background-color: rgba(65, 51, 51, 0.06);
+}
+
+.stock-ring-secondary {
+    color: var(--text-muted-soft);
+    background-color: rgba(65, 51, 51, 0.05);
+}
+
+.stock-ring-warning {
+    color: var(--theme-tertiary);
+    background-color: rgba(242, 118, 94, 0.06);
+}
+
+.stock-status-label {
+    font-size: 1.05rem;
+    font-weight: 600;
+    color: var(--theme-subtle);
+    margin-bottom: 6px;
+}
+
+.stock-status-hint {
+    font-size: 0.82rem;
+    color: var(--text-muted);
+    line-height: 1.4;
+}
+
+
+/* =========================================================
+   17. Empty states
+   ========================================================= */
+.empty-state {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 40px 24px;
+    background-color: #fff;
+    border: 1px solid var(--border-soft);
+    border-radius: var(--radius-lg);
+    box-shadow: var(--shadow-card);
+    text-align: center;
+}
+
+.empty-state-icon {
+    font-size: 48px;
+    color: var(--text-success);
+    font-variation-settings: 'FILL' 1, 'wght' 400, 'GRAD' 0, 'opsz' 48;
+    margin-bottom: 12px;
+}
+
+.empty-state-title {
+    font-size: 1rem;
+    font-weight: 600;
+    color: var(--theme-subtle);
+    margin-bottom: 4px;
+}
+
+.empty-state-text {
+    font-size: 0.88rem;
+    color: var(--text-muted);
+}
+
+/* Muted empty state (e.g., "No items found" inside a table) */
+.empty-cell {
+    text-align: center;
+    color: var(--text-muted);
+    padding: 2rem 1rem !important;
+}
+
+
+/* =========================================================
+   18. Utilities
+   ========================================================= */
+.icon-sm {
+    font-size: 18px;
+}
+
+/* Inactive item banner */
+.inactive-banner {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    padding: 14px 18px;
+    background-color: var(--bg-soft-coral);
+    border: 1px solid rgba(242, 118, 94, 0.3);
+    border-radius: var(--radius-md);
+    color: #8a3d2f;
+}
+
+.inactive-banner .material-symbols-outlined {
+    font-size: 22px;
+    flex-shrink: 0;
+}
+
+.inactive-banner-text {
+    font-size: 0.9rem;
+    line-height: 1.45;
+}
+
+.inactive-banner-text strong {
+    font-weight: 600;
+}
+
+/* =========================================================
+   19. Inline code
+   ========================================================= */
+code {
+    display: inline-block;
+    padding: 2px 8px;
+    font-family: 'Roboto Mono', ui-monospace, 'SF Mono', Menlo, Consolas, monospace;
+    font-size: 0.82em;
+    font-weight: 500;
+    line-height: 1.4;
+    color: var(--theme-secondary);
+    background-color: rgba(49, 91, 140, 0.08);
+    border: 1px solid rgba(49, 91, 140, 0.12);
+    border-radius: 6px;
+    letter-spacing: 0.02em;
+    white-space: nowrap;
+    vertical-align: baseline;
+}
+
+/* Prevent the rounded chip from breaking awkwardly across lines */
+code.long {
+    white-space: normal;
+    word-break: break-all;
+}
+
+/* Optional block variant for multi-line snippets */
+.code-block {
+    display: block;
+    padding: 14px 18px;
+    font-family: 'Roboto Mono', ui-monospace, 'SF Mono', Menlo, Consolas, monospace;
+    font-size: 0.85rem;
+    line-height: 1.55;
+    color: var(--text-on-primary);
+    background-color: #F8F6F3;
+    border: 1px solid var(--border-soft);
+    border-radius: var(--radius-md);
+    overflow-x: auto;
+    white-space: pre;
+}
+
+/* =========================================================
+   Outline button hover contrast
+   Direct rules — bypass MDB's variable system entirely
+   ========================================================= */
+
+/* Primary */
+.btn-outline-primary:hover,
+.btn-outline-primary:focus,
+.btn-outline-primary:active,
+.btn-outline-primary.active {
+    background-color: var(--theme-secondary) !important;
+    border-color: var(--theme-secondary) !important;
+    color: #FFFFFF !important;
+}
+
+/* Secondary */
+.btn-outline-secondary:hover,
+.btn-outline-secondary:focus,
+.btn-outline-secondary:active,
+.btn-outline-secondary.active {
+    background-color: var(--theme-subtle) !important;
+    border-color: var(--theme-subtle) !important;
+    color: var(--text-on-secondary) !important;
+}
+
+/* Danger */
+.btn-outline-danger:hover,
+.btn-outline-danger:focus,
+.btn-outline-danger:active,
+.btn-outline-danger.active {
+    background-color: var(--text-danger) !important;
+    border-color: var(--text-danger) !important;
+    color: #FFFFFF !important;
+}
+
+/* Success */
+.btn-outline-success:hover,
+.btn-outline-success:focus,
+.btn-outline-success:active,
+.btn-outline-success.active {
+    background-color: var(--text-success) !important;
+    border-color: var(--text-success) !important;
+    color: #FFFFFF !important;
+}
+
+/* Warning */
+.btn-outline-warning:hover,
+.btn-outline-warning:focus,
+.btn-outline-warning:active,
+.btn-outline-warning.active {
+    background-color: var(--theme-tertiary) !important;
+    border-color: var(--theme-tertiary) !important;
+    color: #FFFFFF !important;
+}
+
+/* Light (top-bar buttons if any remain) */
+.btn-outline-light:hover,
+.btn-outline-light:focus,
+.btn-outline-light:active,
+.btn-outline-light.active {
+    background-color: rgba(245, 239, 227, 0.15) !important;
+    border-color: rgba(245, 239, 227, 0.55) !important;
+    color: var(--text-on-secondary) !important;
+}
+
+/* Nested content — icons and spans should inherit the text color */
+.btn-outline-primary:hover *,
+.btn-outline-primary:focus *,
+.btn-outline-secondary:hover *,
+.btn-outline-secondary:focus *,
+.btn-outline-danger:hover *,
+.btn-outline-danger:focus *,
+.btn-outline-success:hover *,
+.btn-outline-success:focus *,
+.btn-outline-warning:hover *,
+.btn-outline-warning:focus *,
+.btn-outline-light:hover *,
+.btn-outline-light:focus * {
+    color: inherit !important;
+}
+
+/* =========================================================
+   20. Charts (dashboard)
+   ========================================================= */
+.chart-container {
+    position: relative;
+    height: 260px;
+    width: 100%;
+}
+
+.chart-empty {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    padding: 40px 24px;
+    color: var(--text-muted);
+    min-height: 260px;
+}
+
+.chart-empty .material-symbols-outlined {
+    font-size: 48px;
+    opacity: 0.5;
+    margin-bottom: 10px;
+}
+
+.chart-empty p {
+    margin: 0;
+    font-size: 0.9rem;
+}
+
+.chart-empty-hint {
+    margin-top: 6px !important;
+    font-size: 0.8rem;
+    opacity: 0.75;
+}
+
+/* Segmented chart toggle */
+.chart-toggle {
+    display: inline-flex;
+    background-color: rgba(49, 91, 140, 0.06);
+    border-radius: 8px;
+    padding: 2px;
+    gap: 2px;
+}
+
+.chart-toggle-btn {
+    border: none;
+    background: transparent;
+    color: rgba(65, 51, 51, 0.7);
+    font-size: 0.75rem;
+    font-weight: 500;
+    padding: 4px 10px;
+    border-radius: 6px;
+    cursor: pointer;
+    text-decoration: none;
+    transition: background-color 0.15s, color 0.15s;
+    white-space: nowrap;
+}
+
+.chart-toggle-btn:hover {
+    background-color: rgba(49, 91, 140, 0.08);
+    color: var(--theme-secondary);
+}
+
+.chart-toggle-btn.is-active {
+    background-color: var(--theme-secondary);
+    color: var(--text-on-secondary);
+    font-weight: 500;
+}

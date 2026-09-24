@@ -1,0 +1,282 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{fragments/layout}">
+<head><title>Dashboard</title></head>
+<body>
+<div layout:fragment="content">
+
+    <!-- ===================== Header ===================== -->
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h2 class="detail-title mb-0">Dashboard</h2>
+            <div class="detail-subtitle">Overview of your inventory</div>
+        </div>
+        <a class="btn btn-outline-primary" th:href="@{/items}">
+            <span class="material-symbols-outlined icon-sm me-1">inventory</span>
+            View All Items
+        </a>
+    </div>
+
+    <!-- ===================== Summary cards ===================== -->
+    <div class="row g-3 mb-4">
+        <div class="col-md-4">
+            <div class="stat-card">
+                <div class="stat-icon stat-icon-blue">
+                    <span class="material-symbols-outlined">inventory_2</span>
+                </div>
+                <div>
+                    <div class="stat-label">Active Items</div>
+                    <div class="stat-value" th:text="${dashboard.activeItemCount}">0</div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="stat-card">
+                <div class="stat-icon stat-icon-coral">
+                    <span class="material-symbols-outlined">warning</span>
+                </div>
+                <div>
+                    <div class="stat-label">Low Stock</div>
+                    <div class="stat-value" style="color: var(--theme-tertiary);"
+                         th:text="${dashboard.lowStockItems.size()}">0</div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="stat-card">
+                <div class="stat-icon stat-icon-dark">
+                    <span class="material-symbols-outlined">block</span>
+                </div>
+                <div>
+                    <div class="stat-label">Out of Stock</div>
+                    <div class="stat-value" th:text="${dashboard.outOfStockItems.size()}">0</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ===================== Charts row ===================== -->
+    <div class="row g-3 mb-4">
+
+        <!-- Category doughnut -->
+        <div class="col-lg-6">
+            <div class="surface-card h-100">
+                <div class="surface-header">
+                    <span class="material-symbols-outlined">donut_large</span>
+                    <h6>Items by Category</h6>
+                    <div class="chart-toggle ms-auto" id="categoryToggle">
+                        <button type="button" class="chart-toggle-btn is-active" data-mode="count">Count</button>
+                        <button type="button" class="chart-toggle-btn" data-mode="value">Value</button>
+                    </div>
+                </div>
+
+                <div class="surface-body" th:if="${!dashboard.categoryChart.empty}">
+                    <div class="chart-container">
+                        <canvas id="categoryChart"></canvas>
+                    </div>
+                </div>
+                <div class="surface-body chart-empty" th:if="${dashboard.categoryChart.empty}">
+                    <span class="material-symbols-outlined">bar_chart</span>
+                    <p>No items to chart yet.</p>
+                    <p class="chart-empty-hint">Create items and assign them to categories to see the breakdown.</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Movement trend -->
+        <div class="col-lg-6">
+            <div class="surface-card h-100">
+                <div class="surface-header">
+                    <span class="material-symbols-outlined">show_chart</span>
+                    <h6>Stock Movements</h6>
+                    <div class="chart-toggle ms-auto">
+                        <a class="chart-toggle-btn"
+                           th:classappend="${dashboard.movementDays == 7} ? 'is-active'"
+                           th:href="@{/(days=7)}">7d</a>
+                        <a class="chart-toggle-btn"
+                           th:classappend="${dashboard.movementDays == 14} ? 'is-active'"
+                           th:href="@{/(days=14)}">14d</a>
+                        <a class="chart-toggle-btn"
+                           th:classappend="${dashboard.movementDays == 30} ? 'is-active'"
+                           th:href="@{/(days=30)}">30d</a>
+                    </div>
+                </div>
+
+                <div class="surface-body" th:if="${!dashboard.movementChart.empty}">
+                    <div class="chart-container">
+                        <canvas id="movementChart"></canvas>
+                    </div>
+                </div>
+                <div class="surface-body chart-empty" th:if="${dashboard.movementChart.empty}">
+                    <span class="material-symbols-outlined">show_chart</span>
+                    <p>No stock movements in the last <span th:text="${dashboard.movementDays}">14</span> days.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ===================== Tables row ===================== -->
+    <div class="row g-3">
+
+        <!-- Low stock -->
+        <div class="col-lg-6" th:if="${!dashboard.lowStockItems.isEmpty()}">
+            <div class="surface-card h-100">
+                <div class="surface-header surface-header-coral">
+                    <span class="material-symbols-outlined">warning</span>
+                    <h6>Low Stock Alerts</h6>
+                    <span class="badge bg-warning ms-auto"
+                          th:text="${dashboard.lowStockItems.size()}">0</span>
+                </div>
+                <div class="table-responsive">
+                    <table class="table table-hover mb-0 align-middle">
+                        <thead>
+                        <tr>
+                            <th>SKU</th>
+                            <th>Name</th>
+                            <th class="text-end">Qty</th>
+                            <th class="text-end">Reorder</th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                        <tr th:each="i : ${dashboard.lowStockItems}">
+                            <td><code th:text="${i.sku}">SKU</code></td>
+                            <td>
+                                <a class="text-decoration-none fw-semibold"
+                                   th:href="@{/items/{id}(id=${i.id})}"
+                                   th:text="${i.name}">Name</a>
+                            </td>
+                            <td class="text-end fw-semibold"
+                                style="color: var(--theme-tertiary);"
+                                th:text="${i.quantity}">0</td>
+                            <td class="text-end" th:text="${i.reorderLevel}">0</td>
+                        </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- Out of stock -->
+        <div class="col-lg-6" th:if="${!dashboard.outOfStockItems.isEmpty()}">
+            <div class="surface-card h-100">
+                <div class="surface-header surface-header-dark">
+                    <span class="material-symbols-outlined">block</span>
+                    <h6>Out of Stock</h6>
+                    <span class="badge bg-dark ms-auto"
+                          th:text="${dashboard.outOfStockItems.size()}">0</span>
+                </div>
+                <div class="table-responsive">
+                    <table class="table table-hover mb-0 align-middle">
+                        <thead>
+                        <tr>
+                            <th>SKU</th>
+                            <th>Name</th>
+                            <th>Category</th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                        <tr th:each="i : ${dashboard.outOfStockItems}">
+                            <td><code th:text="${i.sku}">SKU</code></td>
+                            <td>
+                                <a class="text-decoration-none fw-semibold"
+                                   th:href="@{/items/{id}(id=${i.id})}"
+                                   th:text="${i.name}">Name</a>
+                            </td>
+                            <td th:text="${i.category.name}">Category</td>
+                        </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- Recent movements -->
+        <div class="col-12" th:if="${!dashboard.recentMovements.isEmpty()}">
+            <div class="surface-card">
+                <div class="surface-header">
+                    <span class="material-symbols-outlined">swap_horiz</span>
+                    <h6>Recent Movements</h6>
+                    <a class="ms-auto text-decoration-none small"
+                       th:href="@{/items}"
+                       style="color: var(--theme-secondary);">
+                        View items
+                        <span class="material-symbols-outlined icon-sm">arrow_forward</span>
+                    </a>
+                </div>
+                <div class="table-responsive">
+                    <table class="table table-hover mb-0 align-middle">
+                        <thead>
+                        <tr>
+                            <th>Date</th>
+                            <th>Item</th>
+                            <th>Type</th>
+                            <th class="text-end">Qty</th>
+                            <th>By</th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                        <tr th:each="m : ${dashboard.recentMovements}">
+                            <td th:text="${#temporals.format(m.createdAt, 'MMM d, h:mm a')}">Date</td>
+                            <td>
+                                <a class="text-decoration-none fw-semibold"
+                                   th:href="@{/items/{id}(id=${m.item.id})}"
+                                   th:text="${m.item.name}">Item</a>
+                            </td>
+                            <td>
+                                <span th:if="${m.type.name() == 'STOCK_IN'}" class="badge bg-success">
+                                    <span class="material-symbols-outlined badge-icon">arrow_downward</span>
+                                    IN
+                                </span>
+                                <span th:if="${m.type.name() == 'STOCK_OUT'}" class="badge bg-danger">
+                                    <span class="material-symbols-outlined badge-icon">arrow_upward</span>
+                                    OUT
+                                </span>
+                                <span th:if="${m.type.name() == 'ADJUSTMENT'}" class="badge bg-warning">
+                                    <span class="material-symbols-outlined badge-icon">tune</span>
+                                    ADJ
+                                </span>
+                            </td>
+                            <td class="text-end fw-semibold" th:text="${m.quantity}">0</td>
+                            <td th:text="${m.user.username}">user</td>
+                        </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- Empty fallback when there's nothing at all -->
+        <div class="col-12"
+             th:if="${dashboard.lowStockItems.isEmpty()
+                     and dashboard.outOfStockItems.isEmpty()
+                     and dashboard.recentMovements.isEmpty()}">
+            <div class="empty-state">
+                <span class="material-symbols-outlined empty-state-icon">check_circle</span>
+                <div class="empty-state-title">All stock levels are healthy</div>
+                <div class="empty-state-text">No items are below their reorder level.</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ===================== Chart data + init ===================== -->
+    <script th:inline="javascript">
+        /*<![CDATA[*/
+        window.dashboardData = {
+            category: {
+                labels: /*[[${dashboard.categoryChart.labels}]]*/ [],
+                counts: /*[[${dashboard.categoryChart.counts}]]*/ [],
+                values: /*[[${dashboard.categoryChart.values}]]*/ []
+            },
+            movements: {
+                labels:   /*[[${dashboard.movementChart.labels}]]*/ [],
+                stockIn:  /*[[${dashboard.movementChart.stockIn}]]*/ [],
+                stockOut: /*[[${dashboard.movementChart.stockOut}]]*/ []
+            }
+        };
+        /*]]>*/
+    </script>
+
+</div>
+</body>
+</html>

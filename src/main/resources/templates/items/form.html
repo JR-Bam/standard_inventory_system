@@ -1,0 +1,179 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{fragments/layout}">
+<head><title>Item</title></head>
+<body>
+<div layout:fragment="content">
+
+    <div class="detail-header">
+        <div class="detail-header-left">
+            <a class="icon-back" th:href="@{/items}" title="Back to items">
+                <span class="material-symbols-outlined">arrow_back</span>
+            </a>
+            <div>
+                <h2 class="detail-title"
+                    th:text="${mode == 'create'} ? 'New Item' : 'Edit Item'">Item</h2>
+                <div class="detail-subtitle"
+                     th:text="${mode == 'create'} ? 'Add a new item to your inventory' : 'Update the item details'">
+                    Subtitle
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <form method="post"
+          th:action="${mode == 'create'} ? @{/items} : @{/items/{id}(id=${form.id})}"
+          th:object="${form}"
+          class="surface-card">
+
+        <!-- ===================== Identity ===================== -->
+        <div class="surface-header">
+            <span class="material-symbols-outlined">badge</span>
+            <h6>Identity</h6>
+        </div>
+        <div class="surface-body">
+            <div class="row g-3">
+
+                <div class="col-md-4">
+                    <label class="form-label" for="sku">SKU <span class="text-danger">*</span></label>
+                    <input type="text" class="form-control" id="sku" th:field="*{sku}"
+                           th:classappend="${#fields.hasErrors('sku')} ? 'is-invalid'"
+                           placeholder="LAP-001"/>
+                    <div class="invalid-feedback" th:errors="*{sku}">error</div>
+                    <div class="form-text">Letters, numbers, hyphen, underscore.</div>
+                </div>
+
+                <div class="col-md-8">
+                    <label class="form-label" for="name">Name <span class="text-danger">*</span></label>
+                    <input type="text" class="form-control" id="name" th:field="*{name}"
+                           th:classappend="${#fields.hasErrors('name')} ? 'is-invalid'"
+                           placeholder="Dell Laptop XPS 13"/>
+                    <div class="invalid-feedback" th:errors="*{name}">error</div>
+                </div>
+
+                <div class="col-md-6">
+                    <label class="form-label" for="categoryId">Category <span class="text-danger">*</span></label>
+                    <select class="form-select" id="categoryId" th:field="*{categoryId}"
+                            th:classappend="${#fields.hasErrors('categoryId')} ? 'is-invalid'">
+                        <option value="">— Select a category —</option>
+                        <option th:each="c : ${categories}"
+                                th:value="${c.id}"
+                                th:text="${c.name}">Category</option>
+                    </select>
+                    <div class="invalid-feedback" th:errors="*{categoryId}">error</div>
+                    <div class="form-text" th:if="${categories.isEmpty()}">
+                        No active categories exist.
+                        <a th:href="@{/categories/new}">Create one first</a>.
+                    </div>
+                </div>
+
+                <div class="col-md-6">
+                    <label class="form-label" for="location">Location</label>
+                    <input type="text" class="form-control" id="location" th:field="*{location}"
+                           th:classappend="${#fields.hasErrors('location')} ? 'is-invalid'"
+                           placeholder="Warehouse A / Shelf 3"/>
+                    <div class="invalid-feedback" th:errors="*{location}">error</div>
+                </div>
+
+                <div class="col-12">
+                    <label class="form-label" for="description">Description</label>
+                    <textarea class="form-control" id="description" rows="3" th:field="*{description}"
+                              th:classappend="${#fields.hasErrors('description')} ? 'is-invalid'"
+                              placeholder="Optional notes about this item"></textarea>
+                    <div class="invalid-feedback" th:errors="*{description}">error</div>
+                </div>
+
+                <div class="col-12">
+                    <div class="inactive-banner" style="background-color: rgba(49, 91, 140, 0.08); border-color: rgba(49, 91, 140, 0.25); color: #2c3e57;">
+                        <span class="material-symbols-outlined">info</span>
+                        <div class="inactive-banner-text">
+                            <strong>Quantities are set here once.</strong>
+                            After creation, all stock changes are recorded through the movements module.
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+
+        <!-- ===================== Stock and Pricing ===================== -->
+        <div class="surface-header">
+            <span class="material-symbols-outlined">inventory</span>
+            <h6>Stock &amp; Pricing</h6>
+        </div>
+        <div class="surface-body">
+            <div class="row g-3">
+
+                <!-- Create: initial quantity is set here and recorded as an initial stock-in -->
+                <div class="col-md-4" th:if="${mode == 'create'}">
+                    <label class="form-label" for="quantity">
+                        Initial Quantity <span class="text-danger">*</span>
+                    </label>
+                    <input type="number" class="form-control" id="quantity" th:field="*{quantity}" min="0"
+                           th:classappend="${#fields.hasErrors('quantity')} ? 'is-invalid'"
+                           placeholder="0"/>
+                    <div class="invalid-feedback" th:errors="*{quantity}">error</div>
+                    <div class="form-text">Recorded as an initial stock-in movement.</div>
+                </div>
+
+                <!-- Edit: quantity is read-only; changes go through the movements module -->
+                <div class="col-md-4" th:if="${mode == 'edit'}">
+                    <label class="form-label">Quantity</label>
+                    <div class="d-flex align-items-center gap-2">
+                        <span class="fs-4 fw-semibold" th:text="${item.quantity}">0</span>
+                        <a class="btn btn-sm btn-outline-primary"
+                           th:href="@{/items/{id}/movements/new(id=${item.id})}">
+                            <span class="material-symbols-outlined icon-sm me-1">swap_horiz</span>
+                            Record Movement
+                        </a>
+                    </div>
+                    <div class="form-text">Stock changes are managed through the movements module.</div>
+                </div>
+
+                <div class="col-md-4">
+                    <label class="form-label" for="unitPrice">Unit Price (PHP) <span class="text-danger">*</span></label>
+                    <input type="number" step="0.01" min="0" class="form-control" id="unitPrice"
+                           th:field="*{unitPrice}"
+                           th:classappend="${#fields.hasErrors('unitPrice')} ? 'is-invalid'"
+                           placeholder="0.00"/>
+                    <div class="invalid-feedback" th:errors="*{unitPrice}">error</div>
+                </div>
+
+                <div class="col-md-4">
+                    <label class="form-label" for="reorderLevel">Reorder Level <span class="text-danger">*</span></label>
+                    <input type="number" class="form-control" id="reorderLevel" th:field="*{reorderLevel}" min="0"
+                           th:classappend="${#fields.hasErrors('reorderLevel')} ? 'is-invalid'"
+                           placeholder="0"/>
+                    <div class="invalid-feedback" th:errors="*{reorderLevel}">error</div>
+                    <div class="form-text">Alert when quantity falls to or below this value.</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ===================== Status (edit only) ===================== -->
+        <div class="surface-header" th:if="${mode == 'edit'}">
+            <span class="material-symbols-outlined">toggle_on</span>
+            <h6>Status</h6>
+        </div>
+        <div class="surface-body" th:if="${mode == 'edit'}">
+            <div class="form-check form-switch">
+                <input class="form-check-input" type="checkbox" th:field="*{active}" id="active"/>
+                <label class="form-check-label" for="active">
+                    Active — item appears in lists and can receive stock movements
+                </label>
+            </div>
+        </div>
+
+        <!-- ===================== Actions ===================== -->
+        <div class="form-actions px-4 pb-4 pt-3">
+            <a class="btn btn-outline-secondary" th:href="@{/items}">Cancel</a>
+            <button class="btn btn-primary" type="submit">
+                <span class="material-symbols-outlined icon-sm me-1">check</span>
+                Save
+            </button>
+        </div>
+    </form>
+</div>
+</body>
+</html>

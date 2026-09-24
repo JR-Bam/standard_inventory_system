@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{fragments/layout}">
+<head><title>Stock Movements</title></head>
+<body>
+<div layout:fragment="content">
+
+    <div class="detail-header">
+        <div class="detail-header-left">
+            <a class="icon-back" th:href="@{/items/{id}(id=${item.id})}" title="Back to item">
+                <span class="material-symbols-outlined">arrow_back</span>
+            </a>
+            <div>
+                <h2 class="detail-title">Stock Movements</h2>
+                <div class="detail-subtitle">
+                    <span th:text="${item.name}">Item</span>
+                    <span class="detail-dot">·</span>
+                    <code th:text="${item.sku}">SKU</code>
+                </div>
+            </div>
+        </div>
+        <div class="detail-header-actions">
+            <a class="btn btn-primary"
+               th:href="@{/items/{id}/movements/new(id=${item.id})}">
+                <span class="material-symbols-outlined icon-sm me-1">add</span>
+                Record Movement
+            </a>
+        </div>
+    </div>
+
+    <div class="row g-3 mb-4">
+        <div class="col-md-4">
+            <div class="stat-card">
+                <div class="stat-icon stat-icon-blue">
+                    <span class="material-symbols-outlined">inventory</span>
+                </div>
+                <div>
+                    <div class="stat-label">Current Quantity</div>
+                    <div class="stat-value" th:text="${item.quantity}">0</div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="stat-card">
+                <div class="stat-icon stat-icon-coral">
+                    <span class="material-symbols-outlined">warning</span>
+                </div>
+                <div>
+                    <div class="stat-label">Reorder Level</div>
+                    <div class="stat-value" th:text="${item.reorderLevel}">0</div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="stat-card">
+                <div class="stat-icon stat-icon-dark">
+                    <span class="material-symbols-outlined">monitor_heart</span>
+                </div>
+                <div>
+                    <div class="stat-label">Status</div>
+                    <div class="stat-value">
+                        <span class="badge"
+                              th:classappend="${item.stockBadgeClass}"
+                              th:text="${item.stockStatus}">Status</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="surface-card">
+        <div class="surface-header">
+            <span class="material-symbols-outlined">history</span>
+            <h6>Movement History</h6>
+            <span class="badge bg-secondary ms-auto"
+                  th:text="${movements.totalElements}">0</span>
+        </div>
+        <div class="table-responsive">
+            <table class="table table-hover mb-0 align-middle">
+                <thead>
+                <tr>
+                    <th>Date</th>
+                    <th>Type</th>
+                    <th class="text-end">Change</th>
+                    <th class="text-end">Before</th>
+                    <th class="text-end">After</th>
+                    <th>Reason</th>
+                    <th>Reference</th>
+                    <th>By</th>
+                </tr>
+                </thead>
+                <tbody>
+                <tr th:each="m : ${movements.content}">
+                    <td th:text="${#temporals.format(m.createdAt, 'MMM d, yyyy h:mm a')}">Date</td>
+                    <td>
+                        <span th:if="${m.type.name() == 'STOCK_IN'}" class="badge bg-success">
+                            <span class="material-symbols-outlined badge-icon">arrow_downward</span>
+                            IN
+                        </span>
+                        <span th:if="${m.type.name() == 'STOCK_OUT'}" class="badge bg-danger">
+                            <span class="material-symbols-outlined badge-icon">arrow_upward</span>
+                            OUT
+                        </span>
+                        <span th:if="${m.type.name() == 'ADJUSTMENT'}" class="badge bg-warning">
+                            <span class="material-symbols-outlined badge-icon">tune</span>
+                            ADJ
+                        </span>
+                    </td>
+                    <td class="text-end">
+                        <span th:if="${m.type.name() == 'STOCK_IN'}" class="text-success fw-semibold"
+                              th:text="'+' + ${m.quantity}">+0</span>
+                        <span th:if="${m.type.name() == 'STOCK_OUT'}" class="text-danger fw-semibold"
+                              th:text="'-' + ${m.quantity}">-0</span>
+                        <span th:if="${m.type.name() == 'ADJUSTMENT'}" class="fw-semibold"
+                              style="color: var(--theme-tertiary);"
+                              th:text="'~' + ${m.quantity}">~0</span>
+                    </td>
+                    <td class="text-end" th:text="${m.previousQuantity}">0</td>
+                    <td class="text-end fw-semibold" th:text="${m.newQuantity}">0</td>
+                    <td th:text="${m.reason} ?: '—'">—</td>
+                    <td th:text="${m.reference} ?: '—'">—</td>
+                    <td th:text="${m.user.username}">user</td>
+                </tr>
+                <tr th:if="${movements.content.isEmpty()}">
+                    <td colspan="8" class="empty-cell">
+                        No movements recorded yet for this item.
+                    </td>
+                </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <nav class="mt-3" th:if="${movements.totalPages > 1}">
+        <ul class="pagination">
+            <li class="page-item" th:classappend="${movements.first} ? 'disabled'">
+                <a class="page-link"
+                   th:href="@{/items/{id}/movements(id=${item.id}, page=${movements.number - 1})}">
+                    Previous
+                </a>
+            </li>
+            <li class="page-item disabled">
+                <span class="page-link"
+                      th:text="'Page ' + (${movements.number + 1}) + ' of ' + ${movements.totalPages}">Page</span>
+            </li>
+            <li class="page-item" th:classappend="${movements.last} ? 'disabled'">
+                <a class="page-link"
+                   th:href="@{/items/{id}/movements(id=${item.id}, page=${movements.number + 1})}">
+                    Next
+                </a>
+            </li>
+        </ul>
+    </nav>
+</div>
+</body>
+</html>

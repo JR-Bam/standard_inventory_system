@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{fragments/layout}">
+<head><title>Categories</title></head>
+<body>
+<div layout:fragment="content">
+
+    <div class="detail-header">
+        <div class="detail-header-left">
+            <div>
+                <h2 class="detail-title">Categories</h2>
+                <div class="detail-subtitle">Group items into logical buckets</div>
+            </div>
+        </div>
+        <div class="detail-header-actions">
+            <a class="btn btn-primary" th:href="@{/categories/new}">
+                <span class="material-symbols-outlined icon-sm me-1">add</span>
+                New Category
+            </a>
+        </div>
+    </div>
+
+    <form class="row g-2 mb-3" method="get" th:action="@{/categories}">
+        <div class="col-md-4">
+            <input type="text" class="form-control" name="search"
+                   placeholder="Search by name" th:value="${search}"/>
+        </div>
+        <div class="col-md-3">
+            <select class="form-select" name="active">
+                <option value="" th:selected="${activeFilter == null}">All statuses</option>
+                <option value="true" th:selected="${activeFilter != null and activeFilter}">Active</option>
+                <option value="false" th:selected="${activeFilter != null and !activeFilter}">Inactive</option>
+            </select>
+        </div>
+        <div class="col-md-5 d-flex flex-row-reverse gap-2">
+            <button class="btn btn-outline-primary" type="submit" title="Apply filters">
+                <span class="material-symbols-outlined icon-sm">filter_alt</span>
+            </button>
+            <a class="btn btn-outline-secondary" th:href="@{/categories}" title="Reset filters">
+                <span class="material-symbols-outlined icon-sm">restart_alt</span>
+            </a>
+        </div>
+    </form>
+
+    <div class="surface-card">
+        <div class="table-responsive">
+            <table class="table table-hover mb-0 align-middle">
+                <thead>
+                <tr>
+                    <th>Name</th>
+                    <th>Description</th>
+                    <th>Status</th>
+                    <th>Created</th>
+                    <th class="text-end">Actions</th>
+                </tr>
+                </thead>
+                <tbody>
+                <tr th:each="c : ${categories.content}">
+                    <td class="fw-semibold" th:text="${c.name}">Name</td>
+                    <td th:text="${c.description} ?: '—'">—</td>
+                    <td>
+                        <span class="badge"
+                              th:classappend="${c.active} ? 'bg-success' : 'bg-secondary'"
+                              th:text="${c.active} ? 'Active' : 'Inactive'">Active</span>
+                    </td>
+                    <td th:text="${#temporals.format(c.createdAt, 'MMM d, yyyy h:mm a')}">Date</td>
+                    <td class="text-end">
+                        <a class="btn btn-sm btn-outline-primary"
+                           th:href="@{/categories/{id}/edit(id=${c.id})}"
+                           title="Edit">
+                            <span class="material-symbols-outlined icon-sm">edit</span>
+                        </a>
+                        <form class="d-inline" method="post"
+                              th:action="@{/categories/{id}/delete(id=${c.id})}"
+                              onsubmit="return confirm('Deactivate this category?');">
+                            <button class="btn btn-sm btn-outline-danger" type="submit"
+                                    th:disabled="${!c.active}"
+                                    title="Deactivate">
+                                <span class="material-symbols-outlined icon-sm">delete</span>
+                            </button>
+                        </form>
+                    </td>
+                </tr>
+                <tr th:if="${categories.content.isEmpty()}">
+                    <td colspan="5" class="empty-cell">
+                        No categories found.
+                    </td>
+                </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <nav class="mt-3" th:if="${categories.totalPages > 1}">
+        <ul class="pagination">
+            <li class="page-item" th:classappend="${categories.first} ? 'disabled'">
+                <a class="page-link"
+                   th:href="@{/categories(page=${categories.number - 1}, search=${search}, active=${activeFilter})}">
+                    Previous
+                </a>
+            </li>
+            <li class="page-item disabled">
+                <span class="page-link"
+                      th:text="'Page ' + (${categories.number + 1}) + ' of ' + ${categories.totalPages}">Page</span>
+            </li>
+            <li class="page-item" th:classappend="${categories.last} ? 'disabled'">
+                <a class="page-link"
+                   th:href="@{/categories(page=${categories.number + 1}, search=${search}, active=${activeFilter})}">
+                    Next
+                </a>
+            </li>
+        </ul>
+    </nav>
+</div>
+</body>
+</html>

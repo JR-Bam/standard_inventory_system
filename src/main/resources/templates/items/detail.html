@@ -1,0 +1,218 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security"
+      layout:decorate="~{fragments/layout}">
+<head><title>Item Detail</title></head>
+<body>
+<div layout:fragment="content">
+
+    <!-- ===================== Header ===================== -->
+    <div class="detail-header mb-4">
+        <div class="detail-header-left">
+            <a class="icon-back" th:href="@{/items}" title="Back to items">
+                <span class="material-symbols-outlined">arrow_back</span>
+            </a>
+            <div>
+                <h2 class="detail-title" th:text="${item.name}">Name</h2>
+                <div class="detail-subtitle">
+                    <code th:text="${item.sku}">SKU</code>
+                    <span class="detail-dot">·</span>
+                    <span th:text="${item.category.name}">Category</span>
+                </div>
+            </div>
+        </div>
+        <div class="detail-header-actions">
+            <a class="btn btn-outline-primary"
+               th:href="@{/items/{id}/movements(id=${item.id})}">
+                <span class="material-symbols-outlined icon-sm me-1">swap_horiz</span>
+                Movements
+            </a>
+            <a class="btn btn-primary"
+               th:href="@{/items/{id}/edit(id=${item.id})}">
+                <span class="material-symbols-outlined icon-sm me-1">edit</span>
+                Edit
+            </a>
+        </div>
+    </div>
+
+    <!-- ===================== Inactive banner ===================== -->
+    <div th:if="${!item.active}" class="inactive-banner mb-4">
+        <span class="material-symbols-outlined">info</span>
+        <div class="inactive-banner-text">
+            <strong>This item is inactive.</strong>
+            It won't appear in default lists or receive stock movements.
+        </div>
+        <form method="post" class="ms-auto"
+              th:action="@{/items/{id}/restore(id=${item.id})}"
+              sec:authorize="hasRole('ADMIN')">
+            <button class="btn btn-sm btn-primary" type="submit">
+                <span class="material-symbols-outlined icon-sm me-1">restore_from_trash</span>
+                Restore
+            </button>
+        </form>
+    </div>
+
+    <!-- ===================== Stock summary ===================== -->
+    <div class="row g-3 mb-4">
+        <div class="col-md-4">
+            <div class="stat-card">
+                <div class="stat-icon stat-icon-blue">
+                    <span class="material-symbols-outlined">inventory</span>
+                </div>
+                <div>
+                    <div class="stat-label">Current Quantity</div>
+                    <div class="stat-value" th:text="${item.quantity}">0</div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="stat-card">
+                <div class="stat-icon stat-icon-coral">
+                    <span class="material-symbols-outlined">warning</span>
+                </div>
+                <div>
+                    <div class="stat-label">Reorder Level</div>
+                    <div class="stat-value" th:text="${item.reorderLevel}">0</div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="stat-card">
+                <div class="stat-icon stat-icon-green">
+                    <span class="material-symbols-outlined">payments</span>
+                </div>
+                <div>
+                    <div class="stat-label">Total Value</div>
+                    <div class="stat-value"
+                         th:text="${#numbers.formatCurrency(item.totalValue)}">₱0.00</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ===================== Body ===================== -->
+    <div class="row g-3">
+
+        <!-- Left column: details + metadata -->
+        <div class="col-lg-8">
+
+            <div class="surface-card mb-3">
+                <div class="surface-header">
+                    <span class="material-symbols-outlined">description</span>
+                    <h6>Details</h6>
+                </div>
+                <div class="surface-body">
+                    <dl class="detail-list">
+                        <div class="detail-row">
+                            <dt>Category</dt>
+                            <dd th:text="${item.category.name}">Category</dd>
+                        </div>
+                        <div class="detail-row">
+                            <dt>Unit Price</dt>
+                            <dd th:text="${#numbers.formatCurrency(item.unitPrice)}">₱0.00</dd>
+                        </div>
+                        <div class="detail-row">
+                            <dt>Location</dt>
+                            <dd th:text="${item.location} ?: '—'">—</dd>
+                        </div>
+                        <div class="detail-row detail-row-block">
+                            <dt>Description</dt>
+                            <dd th:text="${item.description} ?: '—'">—</dd>
+                        </div>
+                    </dl>
+                </div>
+            </div>
+
+            <div class="surface-card">
+                <div class="surface-header">
+                    <span class="material-symbols-outlined">history</span>
+                    <h6>Metadata</h6>
+                </div>
+                <div class="surface-body">
+                    <dl class="detail-list">
+                        <div class="detail-row">
+                            <dt>Status</dt>
+                            <dd>
+                                <span class="badge"
+                                      th:classappend="${item.active} ? 'bg-success' : 'bg-secondary'"
+                                      th:text="${item.active} ? 'Active' : 'Inactive'">Active</span>
+                            </dd>
+                        </div>
+                        <div class="detail-row">
+                            <dt>Created By</dt>
+                            <dd th:text="${item.createdBy != null} ? ${item.createdBy.username} : '—'">—</dd>
+                        </div>
+                        <div class="detail-row">
+                            <dt>Created</dt>
+                            <dd th:text="${#temporals.format(item.createdAt, 'MMM d, yyyy h:mm a')}">—</dd>
+                        </div>
+                        <div class="detail-row">
+                            <dt>Last Updated</dt>
+                            <dd th:text="${#temporals.format(item.updatedAt, 'MMM d, yyyy h:mm a')}">—</dd>
+                        </div>
+                    </dl>
+                </div>
+            </div>
+        </div>
+
+        <!-- Right column: stock status + actions -->
+        <div class="col-lg-4">
+
+            <div class="surface-card mb-3">
+                <div class="surface-header">
+                    <span class="material-symbols-outlined">monitor_heart</span>
+                    <h6>Stock Status</h6>
+                </div>
+                <div class="surface-body text-center">
+                    <div class="stock-ring"
+                         th:classappend="'stock-ring-' + ${item.stockBadgeClass.replace('bg-', '')}">
+                        <span class="material-symbols-outlined stock-ring-icon"
+                              th:switch="${item.stockStatus}">
+                            <th:block th:case="'In stock'">check_circle</th:block>
+                            <th:block th:case="'Low stock'">error</th:block>
+                            <th:block th:case="'Out of stock'">block</th:block>
+                            <th:block th:case="*">do_not_disturb_on</th:block>
+                        </span>
+                    </div>
+                    <div class="stock-status-label" th:text="${item.stockStatus}">Status</div>
+                    <div class="stock-status-hint" th:if="${item.lowStock}">
+                        At or below reorder level of
+                        <strong th:text="${item.reorderLevel}">0</strong>
+                    </div>
+                    <div class="stock-status-hint" th:if="${item.outOfStock}">
+                        Restock to resume movements
+                    </div>
+                    <div class="stock-status-hint" th:if="${item.active and item.quantity > item.reorderLevel}">
+                        Above reorder level
+                    </div>
+                </div>
+            </div>
+
+            <div class="surface-card" th:if="${item.active}">
+                <div class="surface-header">
+                    <span class="material-symbols-outlined">bolt</span>
+                    <h6>Actions</h6>
+                </div>
+                <div class="surface-body d-grid gap-2">
+                    <a class="btn btn-primary"
+                       th:href="@{/items/{id}/movements/new(id=${item.id})}">
+                        <span class="material-symbols-outlined icon-sm me-1">add</span>
+                        Record Movement
+                    </a>
+                    <form method="post"
+                          th:action="@{/items/{id}/delete(id=${item.id})}"
+                          onsubmit="return confirm('Deactivate this item?');">
+                        <button class="btn btn-outline-danger w-100" type="submit">
+                            <span class="material-symbols-outlined icon-sm me-1">delete</span>
+                            Deactivate
+                        </button>
+                    </form>
+                </div>
+            </div>
+
+        </div>
+    </div>
+</div>
+</body>
+</html>

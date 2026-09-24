@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{fragments/layout}">
+<head><title>Users</title></head>
+<body>
+<div layout:fragment="content">
+
+    <div class="detail-header">
+        <div class="detail-header-left">
+            <div>
+                <h2 class="detail-title">Users</h2>
+                <div class="detail-subtitle">Admin-provisioned accounts</div>
+            </div>
+        </div>
+        <div class="detail-header-actions">
+            <a class="btn btn-primary" th:href="@{/users/new}">
+                <span class="material-symbols-outlined icon-sm me-1">person_add</span>
+                New User
+            </a>
+        </div>
+    </div>
+
+    <form class="row g-2 mb-3" method="get" th:action="@{/users}">
+        <div class="col-md-4">
+            <input type="text" class="form-control" name="search"
+                   placeholder="Search username, name, email" th:value="${search}"/>
+        </div>
+        <div class="col-md-2">
+            <select class="form-select" name="role">
+                <option value="">All roles</option>
+                <option th:each="r : ${roles}"
+                        th:value="${r}"
+                        th:text="${r}"
+                        th:selected="${roleFilter != null and roleFilter == r}">Role</option>
+            </select>
+        </div>
+        <div class="col-md-2">
+            <select class="form-select" name="enabled">
+                <option value="" th:selected="${enabledFilter == null}">All statuses</option>
+                <option value="true" th:selected="${enabledFilter != null and enabledFilter}">Enabled</option>
+                <option value="false" th:selected="${enabledFilter != null and !enabledFilter}">Disabled</option>
+            </select>
+        </div>
+        <div class="col-md-4 d-flex flex-row-reverse gap-2">
+            <button class="btn btn-outline-primary" type="submit" title="Apply filters">
+                <span class="material-symbols-outlined icon-sm">filter_alt</span>
+            </button>
+            <a class="btn btn-outline-secondary" th:href="@{/users}" title="Reset filters">
+                <span class="material-symbols-outlined icon-sm">restart_alt</span>
+            </a>
+        </div>
+    </form>
+
+    <div class="surface-card">
+        <div class="table-responsive">
+            <table class="table table-hover mb-0 align-middle">
+                <thead>
+                <tr>
+                    <th>Username</th>
+                    <th>Full Name</th>
+                    <th>Email</th>
+                    <th>Role</th>
+                    <th>Status</th>
+                    <th>Created</th>
+                    <th class="text-end">Actions</th>
+                </tr>
+                </thead>
+                <tbody>
+                <tr th:each="u : ${users.content}">
+                    <td>
+                        <code th:text="${u.username}">user</code>
+                        <span th:if="${u.mustChangePassword}"
+                              class="badge bg-warning ms-1"
+                              title="Must change password on next login">
+                            <span class="material-symbols-outlined badge-icon">key</span>
+                            Pending
+                        </span>
+                    </td>
+                    <td th:text="${u.fullName}">Full Name</td>
+                    <td th:text="${u.email}">email@example.com</td>
+                    <td>
+                        <span class="badge"
+                              th:classappend="${u.role.name() == 'ADMIN'} ? 'bg-success' : 'bg-secondary'"
+                              th:text="${u.role}">ROLE</span>
+                    </td>
+                    <td>
+                        <span class="badge"
+                              th:classappend="${u.enabled} ? 'bg-success' : 'bg-dark'"
+                              th:text="${u.enabled} ? 'Enabled' : 'Disabled'">Status</span>
+                    </td>
+                    <td th:text="${#temporals.format(u.createdAt, 'MMM d, yyyy')}">Date</td>
+                    <td class="text-end">
+                        <a class="btn btn-sm btn-outline-primary"
+                           th:href="@{/users/{id}/edit(id=${u.id})}"
+                           title="Edit">
+                            <span class="material-symbols-outlined icon-sm">edit</span>
+                        </a>
+                        <form class="d-inline" method="post"
+                              th:action="${u.enabled}
+                                          ? @{/users/{id}/disable(id=${u.id})}
+                                          : @{/users/{id}/enable(id=${u.id})}"
+                              th:onsubmit="${u.enabled}
+                                           ? 'return confirm(\'Disable this user?\');'
+                                           : 'return confirm(\'Enable this user?\');'">
+                            <button class="btn btn-sm"
+                                    th:classappend="${u.enabled} ? 'btn-outline-danger' : 'btn-outline-success'"
+                                    type="submit"
+                                    th:title="${u.enabled} ? 'Disable' : 'Enable'">
+                                <span class="material-symbols-outlined icon-sm"
+                                      th:text="${u.enabled} ? 'block' : 'check_circle'">block</span>
+                            </button>
+                        </form>
+                    </td>
+                </tr>
+                <tr th:if="${users.content.isEmpty()}">
+                    <td colspan="7" class="empty-cell">No users found.</td>
+                </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <nav class="mt-3" th:if="${users.totalPages > 1}">
+        <ul class="pagination">
+            <li class="page-item" th:classappend="${users.first} ? 'disabled'">
+                <a class="page-link"
+                   th:href="@{/users(page=${users.number - 1}, search=${search}, role=${roleFilter}, enabled=${enabledFilter})}">
+                    Previous
+                </a>
+            </li>
+            <li class="page-item disabled">
+                <span class="page-link"
+                      th:text="'Page ' + (${users.number + 1}) + ' of ' + ${users.totalPages}">Page</span>
+            </li>
+            <li class="page-item" th:classappend="${users.last} ? 'disabled'">
+                <a class="page-link"
+                   th:href="@{/users(page=${users.number + 1}, search=${search}, role=${roleFilter}, enabled=${enabledFilter})}">
+                    Next
+                </a>
+            </li>
+        </ul>
+    </nav>
+</div>
+</body>
+</html>

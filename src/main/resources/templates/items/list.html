@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security"
+      layout:decorate="~{fragments/layout}">
+<head><title>Items</title></head>
+<body>
+<div layout:fragment="content">
+
+    <div class="d-flex justify-content-between align-items-center mb-3">
+        <h2 class="mb-0">Items</h2>
+        <a class="btn btn-primary" th:href="@{/items/new}">
+            <span class="material-symbols-outlined">add</span>
+        </a>
+    </div>
+
+    <form class="row g-2 mb-3" method="get" th:action="@{/items}">
+        <div class="col-md-3">
+            <input type="text" class="form-control" name="search"
+                   placeholder="Search name, SKU, description" th:value="${search}"/>
+        </div>
+        <div class="col-md-2">
+            <select class="form-select" name="categoryId">
+                <option value="">All categories</option>
+                <option th:each="c : ${categories}"
+                        th:value="${c.id}"
+                        th:text="${c.name}"
+                        th:selected="${categoryId != null and categoryId == c.id}">Cat</option>
+            </select>
+        </div>
+        <div class="col-md-2">
+            <select class="form-select" name="active">
+                <option value="" th:selected="${activeFilter == null}">All statuses</option>
+                <option value="true" th:selected="${activeFilter != null and activeFilter}">Active</option>
+                <option value="false" th:selected="${activeFilter != null and !activeFilter}">Inactive</option>
+            </select>
+        </div>
+        <div class="col-md-3 d-flex align-items-center">
+            <div class="form-check me-3">
+                <input class="form-check-input" type="checkbox" name="lowStock" value="true"
+                       id="lowStock" th:checked="${lowStock}"/>
+                <label class="form-check-label" for="lowStock">Low stock</label>
+            </div>
+            <div class="form-check">
+                <input class="form-check-input" type="checkbox" name="outOfStock" value="true"
+                       id="outOfStock" th:checked="${outOfStock}"/>
+                <label class="form-check-label" for="outOfStock">Out</label>
+            </div>
+        </div>
+        <div class="col-md-2 d-flex flex-row-reverse gap-2">
+            <button class="btn btn-outline-secondary" type="submit">
+                <span class="material-symbols-outlined">filter_alt</span>
+            </button>
+            <a class="btn btn-outline-secondary" th:href="@{/items}">
+                <span class="material-symbols-outlined">reset_settings</span>
+            </a>
+        </div>
+    </form>
+
+    <div class="card shadow-sm">
+        <div class="table-responsive">
+            <table class="table table-hover mb-0 align-middle">
+                <thead class="table-light">
+                <tr>
+                    <th>SKU</th>
+                    <th>Name</th>
+                    <th>Category</th>
+                    <th class="text-end">Qty</th>
+                    <th class="text-end">Unit Price</th>
+                    <th>Status</th>
+                    <th class="text-end">Actions</th>
+                </tr>
+                </thead>
+                <tbody>
+                <tr th:each="i : ${items.content}">
+                    <td><code th:text="${i.sku}">SKU</code></td>
+                    <td>
+                        <a class="text-decoration-none fw-semibold"
+                           th:href="@{/items/{id}(id=${i.id})}" th:text="${i.name}">Name</a>
+                        <div class="small text-muted" th:if="${i.location}"
+                             th:text="${i.location}">Location</div>
+                    </td>
+                    <td th:text="${i.category.name}">Category</td>
+                    <td class="text-end" th:text="${i.quantity}">0</td>
+                    <td class="text-end"
+                        th:text="${#numbers.formatCurrency(i.unitPrice)}">₱0.00</td>
+                    <td>
+                        <span th:if="${!i.active}" class="badge bg-secondary">Inactive</span>
+                        <span th:if="${i.active and i.quantity == 0}" class="badge bg-dark">Out of stock</span>
+                        <span th:if="${i.active and i.quantity > 0 and i.quantity <= i.reorderLevel}"
+                              class="badge bg-danger">Low stock</span>
+                        <span th:if="${i.active and i.quantity > i.reorderLevel}"
+                              class="badge bg-success">In stock</span>
+                    </td>
+                    <td class="text-end">
+                        <a class="btn btn-sm btn-outline-primary"
+                           th:href="@{/items/{id}/edit(id=${i.id})}">
+                            <span class="material-symbols-outlined" style="font-size:18px;">edit</span>
+                        </a>
+                        <form class="d-inline" method="post"
+                              th:action="@{/items/{id}/delete(id=${i.id})}"
+                              onsubmit="return confirm('Deactivate this item?');">
+                            <button class="btn btn-sm btn-outline-danger" type="submit"
+                                    th:disabled="${!i.active}">
+                                <span class="material-symbols-outlined" style="font-size:18px;">delete</span>
+                            </button>
+                        </form>
+                        <form class="d-inline" method="post"
+                              th:action="@{/items/{id}/restore(id=${i.id})}"
+                              th:if="${!i.active}"
+                              sec:authorize="hasRole('ADMIN')">
+                            <button class="btn btn-sm btn-outline-success" type="submit">
+                                <span class="material-symbols-outlined" style="font-size:18px;">restore_from_trash</span>
+                            </button>
+                        </form>
+                    </td>
+                </tr>
+                <tr th:if="${items.content.isEmpty()}">
+                    <td colspan="7" class="text-center text-muted py-4">No items found.</td>
+                </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <nav class="mt-3" th:if="${items.totalPages > 1}">
+        <ul class="pagination">
+            <li class="page-item" th:classappend="${items.first} ? 'disabled'">
+                <a class="page-link"
+                   th:href="@{/items(page=${items.number - 1}, search=${search}, categoryId=${categoryId}, active=${activeFilter}, lowStock=${lowStock}, outOfStock=${outOfStock}, sort=${sort}, dir=${dir})}">
+                    Previous
+                </a>
+            </li>
+            <li class="page-item disabled">
+                <span class="page-link"
+                      th:text="'Page ' + (${items.number + 1}) + ' of ' + ${items.totalPages}">Page</span>
+            </li>
+            <li class="page-item" th:classappend="${items.last} ? 'disabled'">
+                <a class="page-link"
+                   th:href="@{/items(page=${items.number + 1}, search=${search}, categoryId=${categoryId}, active=${activeFilter}, lowStock=${lowStock}, outOfStock=${outOfStock}, sort=${sort}, dir=${dir})}">
+                    Next
+                </a>
+            </li>
+        </ul>
+    </nav>
+</div>
+</body>
+</html>

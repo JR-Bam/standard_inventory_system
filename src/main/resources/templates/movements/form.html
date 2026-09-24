@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{fragments/layout}">
+<head><title>Record Movement</title></head>
+<body>
+<div layout:fragment="content">
+
+    <div class="detail-header">
+        <div class="detail-header-left">
+            <a class="icon-back"
+               th:href="@{/items/{id}/movements(id=${item.id})}"
+               title="Back to movements">
+                <span class="material-symbols-outlined">arrow_back</span>
+            </a>
+            <div>
+                <h2 class="detail-title">Record Movement</h2>
+                <div class="detail-subtitle">
+                    <span th:text="${item.name}">Item</span>
+                    <span class="detail-dot">·</span>
+                    <code th:text="${item.sku}">SKU</code>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row g-3 mb-4">
+        <div class="col-md-6">
+            <div class="stat-card">
+                <div class="stat-icon stat-icon-blue">
+                    <span class="material-symbols-outlined">inventory</span>
+                </div>
+                <div>
+                    <div class="stat-label">Current Quantity</div>
+                    <div class="stat-value" th:text="${item.quantity}">0</div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-6">
+            <div class="stat-card">
+                <div class="stat-icon stat-icon-coral">
+                    <span class="material-symbols-outlined">warning</span>
+                </div>
+                <div>
+                    <div class="stat-label">Reorder Level</div>
+                    <div class="stat-value" th:text="${item.reorderLevel}">0</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <form method="post"
+          th:action="@{/items/{id}/movements(id=${item.id})}"
+          th:object="${form}"
+          class="surface-card"
+          style="max-width: 720px;">
+
+        <div class="surface-header">
+            <span class="material-symbols-outlined">swap_horiz</span>
+            <h6>Movement Details</h6>
+        </div>
+
+        <div class="surface-body">
+
+            <div class="alert alert-danger" th:if="${#fields.hasGlobalErrors()}">
+                <span class="material-symbols-outlined icon-sm me-1">error</span>
+                <span th:each="err : ${#fields.globalErrors()}" th:text="${err}">error</span>
+            </div>
+
+            <div class="row g-3">
+                <div class="col-md-6">
+                    <label class="form-label" for="type">Movement Type <span class="text-danger">*</span></label>
+                    <select class="form-select" id="type" th:field="*{type}"
+                            th:classappend="${#fields.hasErrors('type')} ? 'is-invalid'">
+                        <option value="">— Select —</option>
+                        <option value="STOCK_IN">Stock In (add)</option>
+                        <option value="STOCK_OUT">Stock Out (remove)</option>
+                    </select>
+                    <div class="invalid-feedback" th:errors="*{type}">error</div>
+                </div>
+
+                <div class="col-md-6">
+                    <label class="form-label" for="quantity">Quantity <span class="text-danger">*</span></label>
+                    <input type="number" min="1" class="form-control" id="quantity"
+                           th:field="*{quantity}"
+                           th:classappend="${#fields.hasErrors('quantity')} ? 'is-invalid'"
+                           placeholder="0"/>
+                    <div class="invalid-feedback" th:errors="*{quantity}">error</div>
+                    <div class="form-text">
+                        For Stock Out, cannot exceed current quantity
+                        (<span th:text="${item.quantity}">0</span>).
+                    </div>
+                </div>
+
+                <div class="col-md-6">
+                    <label class="form-label" for="reason">Reason</label>
+                    <input type="text" class="form-control" id="reason" th:field="*{reason}"
+                           th:classappend="${#fields.hasErrors('reason')} ? 'is-invalid'"
+                           placeholder="e.g., Restock from supplier"/>
+                    <div class="invalid-feedback" th:errors="*{reason}">error</div>
+                </div>
+
+                <div class="col-md-6">
+                    <label class="form-label" for="reference">Reference</label>
+                    <input type="text" class="form-control" id="reference" th:field="*{reference}"
+                           th:classappend="${#fields.hasErrors('reference')} ? 'is-invalid'"
+                           placeholder="e.g., PO-2026-0412"/>
+                    <div class="invalid-feedback" th:errors="*{reference}">error</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="form-actions px-4 pb-4 pt-3">
+            <a class="btn btn-outline-secondary"
+               th:href="@{/items/{id}/movements(id=${item.id})}">Cancel</a>
+            <button class="btn btn-primary" type="submit">
+                <span class="material-symbols-outlined icon-sm me-1">check</span>
+                Record Movement
+            </button>
+        </div>
+    </form>
+</div>
+</body>
+</html>

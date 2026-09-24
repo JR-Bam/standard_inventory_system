@@ -1,0 +1,258 @@
+/* =========================================================
+   Login page — two-panel split layout
+   ========================================================= */
+
+.login-split {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+    min-height: 100vh;
+}
+
+/* ------------------- Left: brand panel ------------------- */
+.login-brand {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    padding: 48px 56px 24px;
+    color: #F5EFE3;
+    overflow: hidden;
+
+    /* Background image with a blue-tinted gradient overlay */
+    background-image: url('/images/login-bg.jpg');
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
+}
+
+/* Tint overlay to keep text readable over any image */
+.login-brand-overlay {
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(
+            135deg,
+            rgba(49, 91, 140, 0.92) 0%,
+            rgba(49, 91, 140, 0.75) 45%,
+            rgba(242, 118, 94, 0.55) 100%
+    );
+    pointer-events: none;
+}
+
+.login-brand-content {
+    position: relative;
+    z-index: 1;
+    max-width: 460px;
+}
+
+.login-brand-logo {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 64px;
+    height: 64px;
+    border-radius: 16px;
+    background: rgba(255, 255, 255, 0.15);
+    backdrop-filter: blur(6px);
+    -webkit-backdrop-filter: blur(6px);
+    border: 1px solid rgba(255, 255, 255, 0.25);
+    margin-bottom: 24px;
+}
+
+.login-brand-logo .material-symbols-outlined {
+    font-size: 36px;
+    color: #F5EFE3;
+}
+
+.login-brand-title {
+    font-size: 2.75rem;
+    font-weight: 700;
+    letter-spacing: -0.02em;
+    margin: 0 0 12px;
+    line-height: 1.1;
+}
+
+.login-brand-tagline {
+    font-size: 1.05rem;
+    line-height: 1.55;
+    opacity: 0.92;
+    margin: 0 0 40px;
+}
+
+.login-brand-features {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 18px;
+}
+
+.login-brand-features li {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    font-size: 0.98rem;
+    line-height: 1.4;
+    opacity: 0.95;
+}
+
+.login-brand-features .material-symbols-outlined {
+    font-size: 22px;
+    padding: 8px;
+    border-radius: 10px;
+    background: rgba(255, 255, 255, 0.12);
+    flex-shrink: 0;
+}
+
+.login-brand-footer {
+    position: relative;
+    z-index: 1;
+    font-size: 0.82rem;
+    opacity: 0.7;
+    margin-top: 32px;
+}
+
+/* ------------------- Right: form panel ------------------- */
+.login-form-panel {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 48px 24px;
+    background-color: var(--theme-primary);
+}
+
+.login-form-wrapper {
+    width: 100%;
+    max-width: 420px;
+}
+
+.login-form-header {
+    margin-bottom: 32px;
+}
+
+.login-form-header h2 {
+    font-size: 1.75rem;
+    font-weight: 600;
+    margin: 0 0 6px;
+    color: var(--theme-subtle);
+}
+
+.login-form-header p {
+    margin: 0;
+    font-size: 0.95rem;
+}
+
+.login-form .form-label {
+    font-weight: 500;
+    color: var(--theme-subtle);
+    font-size: 0.9rem;
+    margin-bottom: 6px;
+}
+
+/* Inputs with an icon inside */
+.login-input {
+    position: relative;
+}
+
+.login-input .form-control {
+    padding-left: 44px;
+    height: 48px;
+    border-radius: 10px;
+    border: 1px solid rgba(65, 51, 51, 0.2);
+    background-color: #FAF7F2;
+    transition: border-color 0.15s, box-shadow 0.15s, background-color 0.15s;
+}
+
+.login-input .form-control:focus {
+    border-color: var(--theme-secondary);
+    box-shadow: 0 0 0 3px rgba(49, 91, 140, 0.15);
+    background-color: #fff;
+}
+
+.login-input-icon {
+    position: absolute;
+    top: 50%;
+    left: 14px;
+    transform: translateY(-50%);
+    font-size: 20px;
+    color: rgba(65, 51, 51, 0.45);
+    pointer-events: none;
+    z-index: 2;
+}
+
+.login-input .form-control:focus + .login-input-icon,
+.login-input .form-control:not(:placeholder-shown) + .login-input-icon {
+    color: var(--theme-secondary);
+}
+
+/* Submit button */
+.login-submit {
+    height: 48px;
+    border-radius: 10px;
+    font-weight: 500;
+    letter-spacing: 0.02em;
+    margin-top: 8px;
+}
+
+/* Note below form */
+.login-form-note {
+    margin-top: 28px;
+    padding-top: 20px;
+    border-top: 1px solid rgba(65, 51, 51, 0.1);
+    font-size: 0.82rem;
+    color: rgba(65, 51, 51, 0.6);
+    text-align: center;
+    line-height: 1.5;
+}
+
+/* ------------------- Responsive ------------------- */
+@media (max-width: 991px) {
+    .login-split {
+        grid-template-columns: 1fr;
+    }
+
+    /* Collapse the brand panel into a compact header bar */
+    .login-brand {
+        padding: 32px 24px;
+        min-height: 220px;
+        justify-content: flex-start;
+    }
+
+    .login-brand-title {
+        font-size: 2rem;
+    }
+
+    .login-brand-tagline {
+        font-size: 0.95rem;
+        margin-bottom: 0;
+    }
+
+    .login-brand-features,
+    .login-brand-footer {
+        display: none;
+    }
+
+    .login-form-panel {
+        padding: 32px 20px 48px;
+        align-items: flex-start;
+    }
+}
+
+/* Company name above the product title */
+.login-brand-eyebrow {
+    font-size: 0.82rem;
+    font-weight: 500;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    opacity: 0.85;
+    margin-bottom: 8px;
+}
+
+/* Adjust title since it now reads "Inventory System" only */
+.login-brand-title {
+    font-size: 2.75rem;
+    font-weight: 700;
+    letter-spacing: -0.02em;
+    margin: 0 0 16px;
+    line-height: 1.1;
+}

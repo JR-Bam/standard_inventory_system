@@ -1,0 +1,187 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{fragments/layout}">
+<head><title>Audit Logs</title></head>
+<body>
+<div layout:fragment="content">
+
+    <div class="detail-header">
+        <div class="detail-header-left">
+            <div>
+                <h2 class="detail-title">Audit Logs</h2>
+                <div class="detail-subtitle">Every create, update, delete, and restore</div>
+            </div>
+        </div>
+    </div>
+
+    <form class="surface-card mb-3" method="get" th:action="@{/logs}">
+        <div class="surface-header">
+            <span class="material-symbols-outlined">filter_alt</span>
+            <h6>Filter Logs</h6>
+        </div>
+        <div class="surface-body">
+
+            <!-- Always visible: search + apply -->
+            <div class="row g-3 align-items-end mb-3">
+                <div class="col-md-9">
+                    <label class="form-label" for="search">Search</label>
+                    <input type="text" class="form-control" id="search" name="search"
+                           placeholder="Entity name or message" th:value="${search}"/>
+                </div>
+                <div class="col-md-3 d-flex gap-2">
+                    <button class="btn btn-primary flex-grow-1" type="submit">
+                        <span class="material-symbols-outlined icon-sm me-1">search</span>
+                        Apply
+                    </button>
+                    <button class="btn btn-outline-secondary" type="button"
+                            data-mdb-collapse-init
+                            data-mdb-target="#advancedFilters"
+                            aria-expanded="false"
+                            aria-controls="advancedFilters"
+                            title="Advanced filters">
+                        <span class="material-symbols-outlined icon-sm">tune</span>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Collapsible: categorical + dates -->
+            <div class="collapse" id="advancedFilters">
+                <hr class="my-3"/>
+                <div class="row g-3">
+                    <!-- entity / action / user -->
+                    <div class="col-lg-4 col-md-6">
+                        <label class="form-label small text-uppercase" for="entityType">Entity</label>
+                        <select class="form-select" id="entityType" name="entityType">
+                            <option value="">All</option>
+                            <option th:each="t : ${entityTypes}"
+                                    th:value="${t}"
+                                    th:text="${t}"
+                                    th:selected="${entityType != null and entityType == t}">Entity</option>
+                        </select>
+                    </div>
+                    <div class="col-lg-4 col-md-6">
+                        <label class="form-label small text-uppercase" for="action">Action</label>
+                        <select class="form-select" id="action" name="action">
+                            <option value="">All</option>
+                            <option th:each="a : ${actions}"
+                                    th:value="${a}"
+                                    th:text="${a}"
+                                    th:selected="${action != null and action == a}">Action</option>
+                        </select>
+                    </div>
+                    <div class="col-lg-4 col-md-6">
+                        <label class="form-label small text-uppercase" for="userId">User</label>
+                        <select class="form-select" id="userId" name="userId">
+                            <option value="">All</option>
+                            <option th:each="u : ${users}"
+                                    th:value="${u[0]}"
+                                    th:text="${u[1]}"
+                                    th:selected="${userId != null and userId == u[0]}">User</option>
+                        </select>
+                    </div>
+                    <!-- from / to -->
+                    <div class="col-lg-6 col-md-6">
+                        <label class="form-label small text-uppercase" for="from">From</label>
+                        <input type="date" class="form-control" id="from" name="from"
+                               th:value="${from}"/>
+                    </div>
+                    <div class="col-lg-6 col-md-6">
+                        <label class="form-label small text-uppercase" for="to">To</label>
+                        <input type="date" class="form-control" id="to" name="to"
+                               th:value="${to}"/>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </form>
+
+    <div class="surface-card">
+        <div class="surface-header">
+            <span class="material-symbols-outlined">receipt_long</span>
+            <h6>Log Entries</h6>
+            <span class="badge bg-secondary ms-auto"
+                  th:text="${logs.totalElements}">0</span>
+        </div>
+        <div class="table-responsive">
+            <table class="table table-hover mb-0 align-middle">
+                <thead>
+                <tr>
+                    <th>When</th>
+                    <th>Action</th>
+                    <th>Entity</th>
+                    <th>Name</th>
+                    <th>Message</th>
+                    <th>By</th>
+                </tr>
+                </thead>
+                <tbody>
+                <tr th:each="l : ${logs.content}">
+                    <td th:text="${#temporals.format(l.createdAt, 'MMM d, yyyy h:mm a')}">—</td>
+                    <td>
+                        <span th:if="${l.action.name() == 'CREATE'}" class="badge bg-success">
+                            <span class="material-symbols-outlined badge-icon">add</span>CREATE
+                        </span>
+                        <span th:if="${l.action.name() == 'UPDATE'}" class="badge bg-warning">
+                            <span class="material-symbols-outlined badge-icon">edit</span>UPDATE
+                        </span>
+                        <span th:if="${l.action.name() == 'DELETE'}" class="badge bg-danger">
+                            <span class="material-symbols-outlined badge-icon">delete</span>DELETE
+                        </span>
+                        <span th:if="${l.action.name() == 'RESTORE'}" class="badge bg-secondary">
+                            <span class="material-symbols-outlined badge-icon">restore_from_trash</span>RESTORE
+                        </span>
+                    </td>
+                    <td>
+                        <span class="badge bg-light text-dark"
+                              th:text="${l.entityType}">ENTITY</span>
+                    </td>
+                    <td th:text="${l.entityName}">—</td>
+                    <td class="text-muted" th:text="${l.message}">—</td>
+                    <td th:text="${l.user.username}">user</td>
+                </tr>
+                <tr th:if="${logs.content.isEmpty()}">
+                    <td colspan="6" class="empty-cell">
+                        No log entries match your filters.
+                    </td>
+                </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <nav class="mt-3" th:if="${logs.totalPages > 1}">
+        <ul class="pagination">
+            <li class="page-item" th:classappend="${logs.first} ? 'disabled'">
+                <a class="page-link"
+                   th:href="@{/logs(
+                       page=${logs.number - 1},
+                       search=${search},
+                       entityType=${entityType},
+                       action=${action},
+                       userId=${userId},
+                       from=${from},
+                       to=${to})}">Previous</a>
+            </li>
+            <li class="page-item disabled">
+                <span class="page-link"
+                      th:text="'Page ' + (${logs.number + 1}) + ' of ' + ${logs.totalPages}">Page</span>
+            </li>
+            <li class="page-item" th:classappend="${logs.last} ? 'disabled'">
+                <a class="page-link"
+                   th:href="@{/logs(
+                       page=${logs.number + 1},
+                       search=${search},
+                       entityType=${entityType},
+                       action=${action},
+                       userId=${userId},
+                       from=${from},
+                       to=${to})}">Next</a>
+            </li>
+        </ul>
+    </nav>
+</div>
+</div>
+</body>
+</html>
