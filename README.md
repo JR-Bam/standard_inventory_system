@@ -262,7 +262,7 @@ Stock movements are **not** duplicated into the audit log. Movements are a busin
 
 ## License
 
-Internal project. Not licensed for external distribution.
+MIT License.
 
 ---
 
